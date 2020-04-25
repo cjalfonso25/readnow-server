@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const router = express();
+const sharp = require("sharp");
 const Users = require("../models/users");
 const auth = require("../middleware/auth");
 
@@ -152,7 +153,11 @@ const upload = multer({
 
 router.post("/api/users/me/avatar", auth, upload, async (req, res) => {
   try {
-    req.user.avatar = req.file.buffer;
+    const buffer = await sharp(req.file.buffer)
+      .resize({ width: 250, height: 250 })
+      .toBuffer();
+
+    req.user.avatar = buffer;
     await req.user.save();
     res.status(201).send(req.user);
   } catch (e) {
