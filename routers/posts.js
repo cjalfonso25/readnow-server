@@ -1,5 +1,6 @@
 const express = require("express");
 const multer = require("multer");
+const sharp = require("sharp");
 const auth = require("../middleware/auth");
 const Post = require("../models/posts");
 const router = express();
@@ -115,11 +116,15 @@ router.put(
   async (req, res) => {
     const _id = req.params.id;
 
+    const buffer = await sharp(req.file.buffer)
+      .resize({ width: 1080, height: 720 })
+      .toBuffer();
+
     const post = await Post.findOne({ _id, owner: req.user._id });
 
     if (!post) return res.status(404).send();
 
-    post.thumbnail = req.file.buffer;
+    post.thumbnail = buffer;
 
     await post.save();
 
