@@ -54,7 +54,7 @@ router.post("/api/users", async (req, res) => {
 router.post("/api/users/login", async (req, res) => {
   try {
     const user = await Users.findByCredentials(
-      req.body.email,
+      req.body.username,
       req.body.password
     );
 
@@ -62,7 +62,7 @@ router.post("/api/users/login", async (req, res) => {
 
     res.status(200).send({ user, token });
   } catch (e) {
-    res.status(400).send();
+    res.status(400).send({ error: "Invalid email or password." });
   }
 });
 
@@ -103,6 +103,7 @@ router.patch("/api/users/me", auth, async (req, res) => {
     "name",
     "title",
     "email",
+    "role",
     "about",
     "password",
     "facebook",
@@ -116,7 +117,7 @@ router.patch("/api/users/me", auth, async (req, res) => {
   );
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: "Invalid updateee!" });
+    return res.status(400).send({ error: "Invalid update!" });
   }
 
   try {

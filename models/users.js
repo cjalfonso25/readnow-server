@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: 50,
     },
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     email: {
       type: String,
       unique: true,
@@ -33,6 +38,9 @@ const userSchema = new mongoose.Schema(
           throw new Error("Password cannot contain 'password'");
         }
       },
+    },
+    role: {
+      type: String,
     },
     title: {
       type: String,
@@ -84,7 +92,7 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
 
-  const token = jwt.sign({ _id: user._id.toString() }, "readnowblog");
+  const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
 
   user.tokens = user.tokens.concat({ token });
   await user.save();
@@ -93,8 +101,8 @@ userSchema.methods.generateAuthToken = async function () {
 };
 
 // Used in /api/users/login
-userSchema.statics.findByCredentials = async (email, password) => {
-  const user = await Users.findOne({ email });
+userSchema.statics.findByCredentials = async (username, password) => {
+  const user = await Users.findOne({ username });
 
   if (!user) {
     throw new Error("Unable to login");
